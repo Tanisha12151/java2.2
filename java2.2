@@ -1,0 +1,72 @@
+import java.io.*;
+import java.util.*;
+
+class Student implements Serializable {
+    int id; String name, grade;
+    Student(int id, String name, String grade) {
+        this.id=id; this.name=name; this.grade=grade;
+    }
+    void display(){ System.out.println(id+" | "+name+" | "+grade); }
+}
+
+class Employee implements Serializable {
+    int id; String name, desg; double salary;
+    Employee(int id,String name,String desg,double salary){
+        this.id=id; this.name=name; this.desg=desg; this.salary=salary;
+    }
+    void display(){ System.out.println(id+" | "+name+" | "+desg+" | "+salary); }
+}
+
+public class Main {
+    static final String STUD_FILE="student.ser", EMP_FILE="employees.dat";
+
+    public static void main(String[] args) throws Exception {
+        Scanner sc=new Scanner(System.in);
+        while(true){
+            System.out.println("\n1.Sum of Integers  2.Student Serialize  3.Employee Menu  4.Exit");
+            int opt=sc.nextInt();
+            switch(opt){
+                case 1 -> { // Part A
+                    sc.nextLine();
+                    System.out.println("Enter numbers:");
+                    String[] arr=sc.nextLine().split(" ");
+                    ArrayList<Integer> list=new ArrayList<>();
+                    for(String s:arr) list.add(Integer.parseInt(s)); // Autobox
+                    int sum=0; for(int x:list) sum+=x; // Unbox
+                    System.out.println("Sum = "+sum);
+                }
+                case 2 -> { // Part B
+                    System.out.print("ID Name Grade: ");
+                    int id=sc.nextInt(); String nm=sc.next(); String gr=sc.next();
+                    Student st=new Student(id,nm,gr);
+                    new ObjectOutputStream(new FileOutputStream(STUD_FILE)).writeObject(st);
+                    Student s=(Student)new ObjectInputStream(new FileInputStream(STUD_FILE)).readObject();
+                    System.out.println("Deserialized Student:"); s.display();
+                }
+                case 3 -> { // Part C
+                    while(true){
+                        System.out.println("\n1.Add Emp  2.Show Emp  3.Back");
+                        int ch=sc.nextInt();
+                        if(ch==1){
+                            System.out.print("ID Name Desg Salary: ");
+                            int id=sc.nextInt(); String nm=sc.next(); String dg=sc.next(); double sal=sc.nextDouble();
+                            ArrayList<Employee> list=readEmp();
+                            list.add(new Employee(id,nm,dg,sal));
+                            new ObjectOutputStream(new FileOutputStream(EMP_FILE)).writeObject(list);
+                        }else if(ch==2){
+                            for(Employee e:readEmp()) e.display();
+                        }else break;
+                    }
+                }
+                case 4 -> { return; }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static ArrayList<Employee> readEmp(){
+        try(ObjectInputStream ois=new ObjectInputStream(new FileInputStream(EMP_FILE))){
+            return (ArrayList<Employee>)ois.readObject();
+        }catch(Exception e){ return new ArrayList<>(); }
+    }
+}
